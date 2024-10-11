@@ -34,4 +34,48 @@ def chat():
 
 if __name__ == '__main__':
     app.run(debug=True)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Food Recommendation</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>AI-Powered Food Recommendation System</h1>
+    <p>Enter your dietary restrictions and preferences, and we'll suggest healthy meals for you.</p>
+
+    <form id="chat-form">
+        <label for="dietary_restrictions">Dietary Restrictions (e.g., allergies, diabetes):</label><br>
+        <input type="text" id="dietary_restrictions" name="dietary_restrictions" required><br><br>
+
+        <label for="user_input">What kind of meal are you looking for today?</label><br>
+        <input type="text" id="user_input" name="user_input" required><br><br>
+
+        <button type="submit">Get Recommendations</button>
+    </form>
+
+    <h2>Meal Suggestions</h2>
+    <p id="response"></p>
+
+    <script>
+        $('#chat-form').on('submit', function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '/chat',
+                data: {
+                    user_input: $('#user_input').val(),
+                    dietary_restrictions: $('#dietary_restrictions').val()
+                },
+                success: function (data) {
+                    $('#response').html(data.response);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
 
