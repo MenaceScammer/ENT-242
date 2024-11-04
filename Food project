@@ -3,7 +3,7 @@ import openai
 import pandas as pd
 
 # Set OpenAI API key for GPT-based chatbot
-openai.api_key = "sk-SbeDydnmKdZqpfrDWFwkNVIoSlrP7jUVfpA1R2cU7KT3BlbkFJWD2uM1yfdhEi_oy23v9aIZSGKkD8u252ZjjI9XyFwA"  # Make sure to replace this with your actual key
+openai.api_key = "sk-SbeDydnmKdZqpfrDWFwkNVIoSlrP7jUVfpA1R2cU7KT3BlbkFJWD2uM1yfdhEi_oy23v9aIZSGKkD8u252ZjjI9XyFwA"  # Replace with your actual key
 
 # Placeholder dataset for demo purposes, including image URLs
 meal_data = pd.DataFrame({
@@ -17,83 +17,47 @@ meal_data = pd.DataFrame({
         "https://therecipewell.com/wp-content/uploads/2019/07/Quinoa-Black-Bean-Salad.jpg",
         "https://data.thefeedfeed.com/recommended/post_4491715.jpeg",
         "https://happyhealthymama.com/wp-content/uploads/2010/03/Penne-Pasta_-2.jpg"
-    ]  # Replace with actual image URLs
+    ]
 })
 
 # Define the Streamlit app
 def main():
     # Add custom CSS for styling
-    st.markdown(
-        """
+    st.markdown("""
         <style>
-            .stApp {
-                background: linear-gradient(135deg, #b8e4a0, #013a20);  /* Green gradient background */
-                color: #333333;             /* Dark gray text for better contrast */
-                font-family: 'Helvetica Neue', sans-serif; /* Font style */
-            }
-            .navbar {
-                background-color: #4CAF50;  /* Green background for the ribbon */
-                overflow: hidden;            /* Clear floats */
-                position: relative;          /* Position relative for inner elements */
-                padding: 10px 20px;         /* Padding for the navbar */
-            }
-            .navbar a {
-                float: left;                 /* Align links to the left */
-                color: white;                /* White text color for links */
-                text-align: center;          /* Center text */
-                padding: 14px 16px;         /* Padding around the links */
-                text-decoration: none;       /* Remove underline from links */
-                font-size: 18px;             /* Font size for links */
-            }
-            .navbar a:hover {
-                background-color: #45a049;   /* Darker green on hover */
+            body {
+                background-color: #f0f8ff;
+                color: #333;
+                font-family: 'Helvetica Neue', sans-serif;
             }
             h1 {
-                color: #ffffff;             /* White text for title */
-                font-size: 42px;            /* Larger font size for title */
-                text-align: center;         /* Center title */
+                color: white;
+                font-size: 42px;
             }
             h2 {
-                color: #ffffff;             /* White text for subtitle */
-                font-size: 24px;            /* Slightly larger subtitle */
-                text-align: center;         /* Center subtitle */
+                color: white;
+                font-size: 18px;
             }
             .stTextInput>div>input {
-                background-color: #ffffff;   /* Light grey input field */
-                border: 1px solid #ccc;      /* Border for input field */
-                border-radius: 5px;          /* Rounded corners */
-                padding: 10px;               /* Padding inside input */
+                background-color: #f7f7f7;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                padding: 10px;
             }
             .stButton>button {
-                background-color: #4CAF50;   /* Green button */
-                color: #ffffff;               /* White text */
-                border: none;                /* No border */
-                border-radius: 5px;         /* Rounded corners */
-                padding: 10px 15px;         /* Padding inside button */
-                font-weight: bold;           /* Bold text */
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 10px 15px;
             }
             .stButton>button:hover {
-                background-color: #45a049;   /* Darker green on hover */
+                background-color: #45a049;
             }
-            
         </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # Add the navigation ribbon
-    st.markdown(
-        """
-        <div class="navbar">
-            <a href="#pricing">Pricing</a>
-            <a href="#education">Education</a>
-            <a href="#story">Story</a>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    """, unsafe_allow_html=True)
     
-    st.title("HealthyNest")
+    st.title("MealFit")
     st.header("Personalized meal suggestions based on dietary preferences and health conditions for university students.")
     
     # Chatbot interaction
@@ -103,7 +67,7 @@ def main():
         if user_input:
             try:
                 response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",  # or use "gpt-4" if you have access
+                    model="gpt-3.5-turbo",
                     messages=[{"role": "user", "content": user_input}],
                     max_tokens=150
                 )
@@ -115,15 +79,17 @@ def main():
     st.sidebar.header("Dietary Preferences")
     health_condition = st.sidebar.selectbox("Select your health condition", ("None", "Diabetes", "High Blood Pressure", "Allergies", "Vegan"))
     avoid_ingredients = st.sidebar.text_input("Enter ingredients to avoid (comma-separated):")
-    avoid_list = avoid_ingredients.lower().split(",")
+    avoid_list = avoid_ingredients.lower().split(",") if avoid_ingredients else []
 
     # Filter meal recommendations based on preferences
     def recommend_meals(health_condition, avoid_list):
         filtered_meals = meal_data.copy()
 
+        # Filter meals based on health condition
         if health_condition != "None":
             filtered_meals = filtered_meals[filtered_meals["Suitable_For"].str.contains(health_condition, case=False, na=False)]
 
+        # Filter out meals containing ingredients to avoid
         if avoid_list:
             for ingredient in avoid_list:
                 filtered_meals = filtered_meals[~filtered_meals["Ingredients"].str.contains(ingredient.strip(), case=False)]
@@ -137,13 +103,11 @@ def main():
     if not recommendations.empty:
         for idx, meal in recommendations.iterrows():
             with st.container():
-                st.markdown("<div class='meal-card'>", unsafe_allow_html=True)
                 # Display the meal image
                 st.image(meal['Image_URL'], caption=meal['Meal'], use_column_width=True)
                 st.write(f"**Ingredients:** {meal['Ingredients']}")
                 st.write(f"**Health Benefits:** {meal['Health_Benefits']}")
                 st.write("---")
-                st.markdown("</div>", unsafe_allow_html=True)
     else:
         st.write("No meals match your criteria.")
 
